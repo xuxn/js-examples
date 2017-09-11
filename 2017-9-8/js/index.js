@@ -19,7 +19,7 @@ window.onload=function(){
 
 	//控制音频
 	var audio=document.getElementById("audio");
-	audio.pause();
+	audio.play();
 	audio.loop=true;
 
 	function changeAudio(event){
