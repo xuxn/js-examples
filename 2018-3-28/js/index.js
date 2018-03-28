@@ -20,9 +20,11 @@ var model = {
     shipLength: 3,
     //击沉的船的数量
     sunkShip: 0,
+    //定义船的数量
+    shipNum:3,
     //定义所有船，每个船是一个对象
     ships: [{locations:["01","02","03"],hits:["","",""]},{locations:["01","02","03"],hits:["","",""]}],
-    //判断击中船没有
+    //击船
     fireBoat: function(location){ 
         for(var i=0;i<this.ships.length;i++){
             var ship = this.ships[i]; 
@@ -59,16 +61,64 @@ var model = {
     }
 }
 var controller = {
-    //
-    hitHander: function(){ 
-        var fireBtn = document.getElementById("fireBtn");
-        fireBtn.addEventListener("click",function(){ 
-            var location = document.getElementById("guessMsg").value; 
-        },false)
+    //定义猜测次数
+    guesses:0,
+    //定义面板的长度和宽度
+    boardSize:7,
+    //解析传入的A0,B0
+    parseGuess: function(location){
+        var alphabet = ["A","B","C","D","E","F"];
+        if(location === "" || location.length >2){
+            alert("Please input a letter and a number on the board.")
+        }else{
+            var firstChar = location.charAt(0);
+            var row = alphabet.indexOf(firstChar);
+            var column = location.charAt(1);
+            if(isNaN(row) || isNaN(column)){
+                alert("Ops, that's isn't on the board!")
+            }else if(row<0 || row > this.boardSize || column <0 || column >this.boardSize){
+                alert("Ops, that's off the board!")
+            }else{
+                return row + column;
+            }
+        }
+        return null; //null就是假值
+    },
+    //判断猜测次数并且判断游戏是否结束
+    processGuess:function(guess){
+        var location = this.parseGuess(guess); 
+        if(location){
+            //只要location不为null,就是位置是有效的,猜测就是成功的，所以增加猜测次数
+            this.guesses ++;
+            //判断是否击沉了所有的船，是否游戏结束
+            var hit  =  model.fireBoat(location);
+            //只要击中，hit就是ture
+            if(hit && model.sunkShip === model.shipNum){
+                view.showMsg("You sunk all my battleships, in" + this.guesses + "guesses");
+            }
+        }
+    }
+} 
+function hitHander(){ 
+    var guessInput = document.getElementById("guessMsg"); 
+    var location = guessInput.value;
+    controller.processGuess(location); 
+    guessInput.value = "";
+}
+function handleKeyPress(e){
+    var fireBtn = document.getElementById("fireBtn");
+    if(e.keyCode ===13){
+        fireBtn.click(); 
+        return false; //不做提交
     }
 }
-function init(){
-    controller.hitHander();
+function init(){ 
+    var fireBtn = document.getElementById("fireBtn");
+    fireBtn.onclick= hitHander;
+
+    var guessInput = document.getElementById("guessMsg");
+    guessInput.onkeypress = handleKeyPress;
+     
 }
-window.onload =init;
+window.onload = init;
  
